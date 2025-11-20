@@ -1,0 +1,59 @@
+# Python artifacts
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtualenvs
+.venv/
+venv/
+ENV/
+env/
+env.bak/
+venv.bak/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+pip-wheel-metadata/
+
+# Test / tooling caches
+.pytest_cache/
+.coverage
+coverage/
+.mypy_cache/
+htmlcov/
+
+# Editor / OS files
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Logs / runtime files
+*.log
+logs/
+tmp/
+*.pid
+
+# Node / frontend dependencies (if present)
+node_modules/
+npm-debug.log
+yarn-error.log
+.pnp.*
+
+# Local secrets / credentials
+.env
+*.env
+.aws/
+secrets/
+private_keys/
+
+# Docker / CI
+docker-compose.override.yml
+.dockerignore
+
+# Misc
+*.sqlite3
+*.db

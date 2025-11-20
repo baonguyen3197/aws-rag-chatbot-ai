@@ -1,0 +1,48 @@
+# Reflex
+.states
+.web
+*.db
+assets/external/
+*.py[cod]
+
+# Terraform
+.terraform/
+*.tfplan
+terraform.tfstate
+terraform.tfstate.backup
+terraform.tfvars
+.terraform.lock.hcl
+*.tfstate
+*.tfstate.*
+crash.log
+override.tf
+override.tf.json
+*_override.tf
+*.tfvars
+
+# IDE / OS
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# Node / Python
+node_modules/
+__pycache__/
+
+.env
+.env.*
+*.pem
+*.key
+
+.venv/
+venv/
+*.pyc
+
+*.db
+.web
+assets/external/
+*.py[cod]
+.states
+.env

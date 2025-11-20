@@ -1,0 +1,11 @@
+reflex
+reflex-chakra
+boto3
+python-dotenv
+authlib 
+werkzeug 
+flask 
+requests
+fastapi
+uvicorn
+huggingface_hub
