@@ -7,7 +7,12 @@ from aws_rag_chatbot_ai.components.navbar import navbar
 
 message_style = dict(display="inline-block", padding="1em", border_radius="8px", max_width=["30em", "30em", "50em", "50em", "50em", "50em"])
 
-def message(qa: QA) -> rx.Component:
+def message(qa: QA, idx: int | None = None) -> rx.Component:
+    """Render a single QA message. Accepts optional index to use as a stable key."""
+    outer_kwargs = {"width": "100%"}
+    if idx is not None:
+        outer_kwargs["key"] = f"msg-{idx}"
+
     return rx.box(
         rx.box(
             rx.markdown(qa.question, background_color=rx.color("mauve", 4), color=rx.color("mauve", 12), **message_style),
@@ -19,12 +24,12 @@ def message(qa: QA) -> rx.Component:
             text_align="left",
             padding_top="1em",
         ),
-        width="100%",
+        **outer_kwargs,
     )
 
 def chat() -> rx.Component:
     return rx.vstack(
-        rx.box(rx.foreach(State.chats[State.current_chat], message), width="100%"),
+        rx.box(rx.foreach(State.chats[State.current_chat], lambda qa, i: message(qa, i)), width="100%"),
         py="8",
         flex="1",
         width="100%",

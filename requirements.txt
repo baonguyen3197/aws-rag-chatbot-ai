@@ -1,3 +1,4 @@
+awscli
 reflex
 reflex-chakra
 boto3
@@ -8,4 +9,3 @@ flask
 requests
 fastapi
 uvicorn
-huggingface_hub

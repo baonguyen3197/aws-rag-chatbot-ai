@@ -86,7 +86,8 @@ def navbar() -> rx.Component:
                 align_items="center",
             ),
             rx.hstack(
-                modal(),  # Use the modal component directly
+                rx.badge("v1.0.0", size="2", color_scheme="indigo"),
+                modal(),
                 sidebar(
                     rx.button(
                         rx.icon(

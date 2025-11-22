@@ -14,6 +14,7 @@ def chat_page() -> rx.Component:
     logging.basicConfig(level=logging.DEBUG)
     logger = logging.getLogger(__name__)
     logger.debug("Rendering chat page")
+
     return rx.vstack(
         navbar(),
         chat(),
