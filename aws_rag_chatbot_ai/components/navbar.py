@@ -1,5 +1,6 @@
 import reflex as rx
 from aws_rag_chatbot_ai.chat.state import State
+from aws_rag_chatbot_ai.components.version import get_version
 
 def sidebar_chat(chat: str) -> rx.Component:
     """A sidebar chat item."""
@@ -55,8 +56,8 @@ def modal() -> rx.Component:
     return rx.dialog.root(
         rx.dialog.trigger(rx.button("+ New chat")),
         rx.dialog.content(
-            rx.dialog.title("Create New Chat"),  # Required for accessibility
-            rx.dialog.description("Enter a name for your new chat."),  # Optional but recommended
+            rx.dialog.title("Create New Chat"),
+            rx.dialog.description("Enter a name for your new chat."),
             rx.hstack(
                 rx.input(
                     placeholder="Type something...",
@@ -85,8 +86,8 @@ def navbar() -> rx.Component:
                 ),
                 align_items="center",
             ),
-            rx.hstack(
-                rx.badge("v1.0.0", size="2", color_scheme="indigo"),
+                rx.hstack(
+                rx.badge(get_version(), size="2", color_scheme="indigo"),
                 modal(),
                 sidebar(
                     rx.button(

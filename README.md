@@ -12,3 +12,11 @@ pip install -r requirements.txt
 =====================================
 ```bash
 reflex init
+```
+
+=====================================
+## Run Reflex App
+=====================================
+```bash
+reflex run
+```
