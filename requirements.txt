@@ -9,3 +9,6 @@ flask
 requests
 fastapi
 uvicorn
+sentence-transformers
+faiss-cpu
+numpy

@@ -11,18 +11,18 @@ from typing import List, Dict
 
 # RAG constants (tune as needed)
 RAG_TOP_K = 5
-RAG_SIM_THRESHOLD = 0.75
+RAG_SIM_THRESHOLD = 0.2
 RAG_RERANK_TOP = 10
 RAG_RERANK_KEEP = 5
 
 
 # -- System prompt --
 SYSTEM_PROMPT = (
-    "You are a retrieval-augmented assistant. Use ONLY the provided retrieved "
-    "snippets as evidence for factual claims. If the KB is insufficient, be "
+    "You are a retrieval-augmented assistant. Use the provided retrieved "
+    "snippets as reference for factual claims. If the KB is insufficient, be "
     "explicit: say 'I don't have enough information in the knowledge base to "
-    "answer that confidently.' Begin with a 1–2 sentence summary, then Evidence, "
-    "then Explanation, then Sources. Be concise and avoid hallucination."
+    "answer that confidently.' Begin with a 1–2 sentence summary, then "
+    "an explanation and any relevant sources. Be concise and avoid hallucination."
 )
 
 
@@ -38,8 +38,8 @@ RETRIEVAL_INSTRUCTION = (
     "Would you like me to search more, upload a document, or answer from general knowledge (may be less reliable)?\"\n"
     "- Otherwise, produce an answer with this structure:\n"
     "  Short Answer (1–3 sentences).\n"
-    "  Evidence Summary: for each factual claim, include a bullet with a quoted snippet and its metadata.\n"
-    "  Explanation/Steps: use sequentially numbered steps; include transitions between steps.\n"
+    "  Explanation/Details: summarize the findings from the retrieved snippets, using bullets as needed.\n"
+    "  Steps (if applicable): use sequentially numbered steps; include transitions between steps.\n"
     "  Confidence & Gaps: High/Medium/Low and what is missing.\n"
     "  Sources: short list with title — source_id — 1-line note.\n"
     "- Never assert facts not supported by snippets; flag unsupported claims.\n"
@@ -56,10 +56,6 @@ OUTPUT_TEMPLATE = (
     "  1. ...\n"
     "- **Procedure / Steps:**\n"
     "  1. Step one. After step 1, do...\n"
-    "\n"
-    "Evidence & Citations:\n"
-    "- Claim A:\n"
-    "  - Evidence: \"...\" — `<title> | <section> | chunk=<id>`\n"
     "\n"
     "Confidence: High / Medium / Low\n"
     "Gaps / What’s missing:\n"
