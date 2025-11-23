@@ -8,6 +8,7 @@ assets/external/
 # Terraform
 .terraform/
 *.tfplan
+tfplan
 terraform.tfstate
 terraform.tfstate.backup
 terraform.tfvars

@@ -1,0 +1,35 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: react-nginx
+  namespace: web-dev
+  labels:
+    app: react-nginx
+spec:
+  replicas: 2
+  revisionHistoryLimit: 3
+  selector:
+    matchLabels:
+      app: react-nginx
+  template:
+    metadata:
+      labels:
+        app: react-nginx
+    spec:
+      containers:
+        - name: web
+          image: docker.io/nhqb3197/react-nginx-argocd:latest
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 80
+  strategy:
+    canary:
+      maxSurge: 25%
+      maxUnavailable: 0
+      steps:
+        - setWeight: 25
+        - pause: { duration: 10 }
+        - setWeight: 50
+        - pause: { duration: 10 }
+        - setWeight: 100
