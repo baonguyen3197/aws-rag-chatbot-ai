@@ -46,3 +46,9 @@ variable "node_min_size" {
   type        = number
   default     = 1
 }
+
+variable "node_instance_type" {
+  description = "EC2 instance type for EKS worker nodes"
+  type        = string
+  default     = "m5.xlarge"
+}

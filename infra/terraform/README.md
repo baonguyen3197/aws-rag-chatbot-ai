@@ -37,7 +37,7 @@ terraform plan --out=tfplan
 
 ## Apply Terraform Configuration
 ```bash
-terraform apply tfplan
+terraform apply "tfplan"
 ```
 
 ## Destroy Terraform-managed Infrastructure

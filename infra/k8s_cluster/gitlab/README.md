@@ -13,16 +13,16 @@ helm repo update
 helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   --create-namespace \
-  -f ./gitlab/gitlab-values.yaml \
+  -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
   --set global.hosts.domain=nhqb-gitlab.duckdns.org \
-  --set global.hosts.externalIP=10.0.0.62 \
+  --set global.hosts.externalIP=10.0.0.155 \
   --set certmanager-issuer.email=baonguyen3197@gmail.com \
   --namespace gitlab
 
-kubectl apply -f gitlab/gp2-csi.yaml
+kubectl apply -f ./infra/k8s_cluster/gitlab/gp2-csi.yaml
 kubectl patch storageclass gp2-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
-helm upgrade --install gitlab gitlab/gitlab -n gitlab -f gitlab/gitlab-values.yaml
+helm upgrade --install gitlab gitlab/gitlab -n gitlab -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml
 
 kubectl apply -f gitlab/gitlab-ingress.yaml
 ```
