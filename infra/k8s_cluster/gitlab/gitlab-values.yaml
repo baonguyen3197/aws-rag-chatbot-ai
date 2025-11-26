@@ -25,7 +25,7 @@
 ## https://docs.gitlab.com/charts/charts/globals
 global:
   storage:
-    storageClass: gp2
+    storageClass: gp2-csi
 
   common:
     labels: {}
@@ -1587,52 +1587,6 @@ gitlab-zoekt:
   gateway:
     basicAuth:
       enabled: false # Basic auth is no longer needed because we've switched to using JWT instead
-      secretName: '{{ include "gitlab.zoekt.gateway.basicAuth.secretName" $ }}'
-  indexer:
-    internalApi:
-      enabled: true
-      secretName: '{{ include "gitlab.zoekt.indexer.internalApi.secretName" $ }}'
-      secretKey: '{{ include "gitlab.zoekt.indexer.internalApi.secretKey" $ }}'
-      gitlabUrl: '{{ include "gitlab.zoekt.indexer.internalApi.gitlabUrl" $ }}'
-
-## Installation & configuration of OpenBao
-openbao:
-  install: false
-  # Disable Openbao managed unseal secret and mount secret managed by shared secrets.
-  staticUnsealSecret:
-    generate: false
-  extraVolumes: |
-    - name: unseal
-      secret:
-        secretName: '{{ template "gitlab.openbao.unseal.secret" . }}'
-  extraVolumeMounts: |
-    - name: unseal
-      mountPath: /srv/openbao/keys/gl-unseal-1
-      subPath: '{{ template "gitlab.openbao.unseal.key" . }}'
-      readOnly: true
-  psql: {}
-  config:
-    unseal:
-      static:
-        enabled: true
-        currentKeyId: "gl-unseal-1"
-        currentKey: "/srv/openbao/keys/gl-unseal-1"
-    # Use external hostname in OpenBao auth.
-    initialize:
-      oidcDiscoveryUrl: '{{ include "gitlab.gitlab.url" . }}'
-      boundIssuer: '{{ include "gitlab.gitlab.url" . }}'
-    storage:
-      postgresql:
-        primary:
-          persistence:
-            storageClass: gp2
-        # Set predefined keys to empty values to enable us merging these keys
-        # with the main DB settings.
-        connection:
-          host: ''
-          database: ''
-          username: ''
-          sslMode: ''
       secretName: '{{ include "gitlab.zoekt.gateway.basicAuth.secretName" $ }}'
   indexer:
     internalApi:

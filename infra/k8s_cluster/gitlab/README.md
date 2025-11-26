@@ -3,6 +3,10 @@
 ## Get AWS K8s config
 ```bash
 aws eks --region <region> update-kubeconfig --name <cluster_name>
+aws eks --region ap-northeast-1 update-kubeconfig --name nhqb-terraform-k8s-cluster
+
+# Check status:
+aws eks --region ap-northeast-1 describe-addon --cluster-name nhqb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
 ```
 ============================
 ## Install GitLab with Helm
@@ -15,39 +19,22 @@ helm upgrade --install gitlab gitlab/gitlab \
   --create-namespace \
   -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
   --set global.hosts.domain=nhqb-gitlab.duckdns.org \
-  --set global.hosts.externalIP=10.0.0.155 \
+  --set global.hosts.externalIP=10.0.0.146 \
   --set certmanager-issuer.email=baonguyen3197@gmail.com \
-  --namespace gitlab
-
-kubectl apply -f ./infra/k8s_cluster/gitlab/gp2-csi.yaml
-kubectl patch storageclass gp2-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
-
-helm upgrade --install gitlab gitlab/gitlab -n gitlab -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml
-
-kubectl apply -f gitlab/gitlab-ingress.yaml
-```
-```powershell
-# powershell
-helm repo add gitlab https://charts.gitlab.io/
-helm repo update
-helm upgrade --install gitlab gitlab/gitlab `
-  -n gitlab `
-  --create-namespace `
-  -f ./gitlab/gitlab-values.yaml `
-  --set global.hosts.domain=nhqb-gitlab.duckdns.org `
-  --set global.hosts.externalIP=52.192.65.76 `
-  --set certmanager-issuer.email=baonguyen3197@gmail.com `
   --namespace gitlab
 ```
 
 ## Update StorageClass to gp2
 ```bash
-kubectl apply -f gitlab/gp2-csi.yaml
+kubectl apply -f ./infra/k8s_cluster/gitlab/gp2-csi.yaml
 kubectl patch storageclass gp2-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
-helm upgrade --install gitlab gitlab/gitlab -n gitlab -f gitlab/gitlab-values.yaml
+helm upgrade --install gitlab gitlab/gitlab -n gitlab -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml
 
-kubectl apply -f gitlab/gitlab-ingress.yaml
+kubectl apply -f ./infra/k8s_cluster/gitlab/gitlab-ingress.yaml
+
+kubectl create namespace ingress-nginx
+kubectl apply -f ./infra/k8s_cluster/ingress/nginx-internal-svc.yaml
 ```
 
 ```bash

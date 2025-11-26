@@ -52,3 +52,69 @@ variable "node_instance_type" {
   type        = string
   default     = "m5.xlarge"
 }
+
+variable "enable_ebs_addon" {
+  description = "Whether to create the EBS CSI addon and related IAM role/policy"
+  type        = bool
+  default     = true
+}
+
+variable "ebs_service_account_namespace" {
+  description = "Namespace of the EBS CSI driver service account"
+  type        = string
+  default     = "kube-system"
+}
+
+variable "ebs_service_account_name" {
+  description = "Service account name used by the EBS CSI controller"
+  type        = string
+  default     = "ebs-csi-controller-sa"
+}
+
+variable "create_iam_oidc_provider" {
+  description = "Whether to create an IAM OIDC provider for the EKS cluster (required for IRSA). If false, assume provider already exists."
+  type        = bool
+  default     = true
+}
+
+variable "ebs_role_name" {
+  description = "IAM role name to create for EBS CSI (IRSA)"
+  type        = string
+  default     = "nhqb-terraform-EBS"
+}
+
+variable "enable_addon_vpc_cni" {
+  description = "Enable the Amazon VPC CNI managed addon"
+  type        = bool
+  default     = true
+}
+
+variable "enable_addon_coredns" {
+  description = "Enable the CoreDNS managed addon"
+  type        = bool
+  default     = true
+}
+
+variable "enable_addon_kube_proxy" {
+  description = "Enable the kube-proxy managed addon"
+  type        = bool
+  default     = true
+}
+
+variable "enable_addon_pod_identity" {
+  description = "Enable the Amazon EKS Pod Identity Agent managed addon"
+  type        = bool
+  default     = false
+}
+
+variable "ebs_service_account_role_arn" {
+  description = "Optional: existing IAM role ARN to attach to the EBS CSI driver's service account via the addon"
+  type        = string
+  default     = ""
+}
+
+variable "pod_identity_service_account_role_arn" {
+  description = "Optional: existing IAM role ARN to attach to the Pod Identity Agent service account via the addon"
+  type        = string
+  default     = ""
+}

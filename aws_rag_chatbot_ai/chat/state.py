@@ -86,6 +86,22 @@ def make_resource(resource_name: str, region: str = None, **kwargs):
         return boto3.resource(resource_name, region_name=region, endpoint_url=endpoint, **kwargs)
     return boto3.resource(resource_name, region_name=region, **kwargs)
 
+
+def _item_is_deleted(item: dict) -> bool:
+    """Return True if the DynamoDB item indicates a soft-delete.
+
+    Handles booleans and string representations ('true', '1').
+    """
+    if not item:
+        return False
+    v = item.get('isDeleted')
+    if isinstance(v, bool):
+        return v
+    try:
+        return str(v).lower() in ("true", "1", "yes")
+    except Exception:
+        return False
+
 # Simple in-memory cache of S3 documents to avoid re-reading on every question.
 # Key: bucket/key -> content string
 _s3_doc_cache: Dict[str, str] = {} 
@@ -174,7 +190,8 @@ class State(rx.State):
             "user_id": self.user_id,
             "session_id": session_id,
             "chat_name": chat_name,
-            "messages": []  # Start with empty message list
+            "messages": [],  # Start with empty message list
+            "isDeleted": False,
         }
         try:
             chat_table.put_item(Item=item)
@@ -188,34 +205,56 @@ class State(rx.State):
             raise
 
     def delete_chat(self):
-        
+        # Soft-delete: prefer marking the specific session_id for this chat as deleted.
         if self.current_chat not in self.chats:
             return
 
         chat_titles = list(self.chats.keys())
         current_index = chat_titles.index(self.current_chat)
 
+        # First try to mark the known session id for this chat (most reliable)
+        session_id = self.session_ids.get(self.current_chat)
+        if session_id:
+            try:
+                chat_table.update_item(
+                    Key={"user_id": self.user_id, "session_id": session_id},
+                    UpdateExpression="SET isDeleted = :val",
+                    ExpressionAttributeValues={":val": True},
+                )
+            except Exception:
+                # Fall back to scanning by chat_name below
+                session_id = None
+
+        # If we didn't have a session_id or the update failed, mark any items matching chat_name
+        if not session_id:
+            try:
+                response = chat_table.query(
+                    KeyConditionExpression="user_id = :uid",
+                    ExpressionAttributeValues={":uid": self.user_id}
+                )
+                for item in response.get("Items", []):
+                    try:
+                        if item.get("chat_name") == self.current_chat:
+                            chat_table.update_item(
+                                Key={"user_id": self.user_id, "session_id": item.get("session_id")},
+                                UpdateExpression="SET isDeleted = :val",
+                                ExpressionAttributeValues={":val": True},
+                            )
+                    except Exception:
+                        pass
+            except Exception:
+                pass
+
+        # Remove from UI view
         try:
-            response = chat_table.query(
-                KeyConditionExpression="user_id = :uid AND begins_with(session_id, :sid)",
-                ExpressionAttributeValues={":uid": self.user_id, ":sid": self.current_chat}
-            )
-            
-            for item in response.get("Items", []):
-                if item["chat_name"] == self.current_chat:
-                    chat_table.delete_item(
-                        Key={"user_id": self.user_id, "session_id": item["session_id"]}
-                    )
-                    break
-        except Exception as e:
+            del self.chats[self.current_chat]
+        except Exception:
             pass
 
-        del self.chats[self.current_chat]
-
+        # Ensure there's always at least one chat visible for UI
         if not self.chats:
             self.chats = DEFAULT_CHATS.copy()
             self.current_chat = "Intros"
-            
             session_id = f"Intros#{datetime.now(timezone.utc).isoformat()}Z"
             try:
                 chat_table.put_item(
@@ -224,10 +263,10 @@ class State(rx.State):
                         "session_id": session_id,
                         "chat_name": "Intros",
                         "chat_history": [],
+                        "isDeleted": False,
                     }
                 )
-                
-            except Exception as e:
+            except Exception:
                 pass
         else:
             remaining_chats = list(self.chats.keys())
@@ -249,6 +288,7 @@ class State(rx.State):
                             "session_id": session_id,
                             "chat_name": "Intros",
                             "chat_history": [],
+                            "isDeleted": False,
                         }
                     )
                 except Exception:
@@ -282,6 +322,7 @@ class State(rx.State):
                     "session_id": session_id,
                     "chat_name": "Intros",
                     "chat_history": [],
+                    "isDeleted": False,
                 }
             )
             
@@ -450,6 +491,7 @@ class State(rx.State):
                     "session_id": session_id,
                     "chat_name": self.current_chat,
                     "messages": existing_messages,
+                    "isDeleted": False,
                 }
             )
             
@@ -485,13 +527,20 @@ class State(rx.State):
                     if item.get('session_id') == 'meta#last_active':
                         meta_item = item
                         break
-
                 for item in items:
                     if item.get('session_id') == 'meta#last_active':
                         continue
+                    # Skip sessions that were soft-deleted
+                    if _item_is_deleted(item):
+                        continue
+
                     chat_name = item.get("chat_name", "Intros")
                     session_id = item.get("session_id")
-                    messages = item.get("messages", [])
+                    # NOTE: previously we hid chats present in `meta#hidden_chats`.
+                    # That caused cases where all chats became invisible if the
+                    # metadata was incorrect. To be safe, always load chats from
+                    # the DB and keep `hidden_chats` only as metadata (not enforced).
+                    messages = item.get("messages", []) or item.get("chat_history", [])
                     unique_chat_name = chat_name if chat_name not in self.chats else f"{chat_name}_{session_id}"
                     # Sanitize loaded answers: remove any previously persisted "Evidence" blocks
                     sanitized_qas = []
@@ -512,26 +561,31 @@ class State(rx.State):
                         except Exception:
                             pass
                         sanitized_qas.append(QA(question=q_text, answer=a_text))
-                    self.chats[unique_chat_name] = sanitized_qas
-                    self.session_ids[unique_chat_name] = session_id
+                        self.chats[unique_chat_name] = sanitized_qas
+                        # remember session id mapping for this chat name
+                        try:
+                            self.session_ids[unique_chat_name] = session_id
+                        except Exception:
+                            pass
 
-                # Prefer the last active chat if present in metadata and exists in loaded chats
-                if meta_item and meta_item.get('last_active_chat'):
-                    desired = meta_item.get('last_active_chat')
-                    if desired in self.chats:
-                        self.current_chat = desired
+                    # Prefer the last active chat if present in metadata and exists in loaded chats
+                    if meta_item and meta_item.get('last_active_chat'):
+                        desired = meta_item.get('last_active_chat')
+                        if desired in self.chats:
+                            self.current_chat = desired
+                        else:
+                            # Try prefix match if names were made unique with session ids
+                            found = next((k for k in self.chats.keys() if k.startswith(desired)), None)
+                            self.current_chat = found or (list(self.chats.keys())[0] if self.chats else 'Intros')
                     else:
-                        # Try prefix match if names were made unique with session ids
-                        found = next((k for k in self.chats.keys() if k.startswith(desired)), None)
-                        self.current_chat = found or (list(self.chats.keys())[0] if self.chats else 'Intros')
-                else:
-                    self.current_chat = list(self.chats.keys())[0] if self.chats else 'Intros'
+                        self.current_chat = list(self.chats.keys())[0] if self.chats else 'Intros'
 
-            # Brief non-verbose status for UI/console
-            self.session_load_message = "Sessions loaded."
+                # Brief non-verbose status for UI/console
+                self.session_load_message = "Sessions loaded."
 
-            # Ensure UI updates with loaded data
-            self.chats = self.chats
+                # Ensure UI updates with loaded data
+                self.chats = self.chats
+
         except ClientError:
             self.chats = DEFAULT_CHATS.copy()
             self.current_chat = "Intros"
@@ -541,7 +595,7 @@ class State(rx.State):
             self.chats = DEFAULT_CHATS.copy()
             self.current_chat = "Intros"
             self.session_ids = {"Intros": f"Session#{datetime.now(timezone.utc).isoformat()}Z"}
-            self.session_load_message = "Failed to load sessions; using defaults."
+            self.session_load_message = "Failed to load sessions; using defaults."    
 
     async def get_knowledge_base(self) -> str:
         """Retrieve content from all files under the specified S3 prefix."""
@@ -787,6 +841,7 @@ class State(rx.State):
                         "session_id": session_id,
                         "chat_name": self.current_chat,
                         "messages": messages,
+                        "isDeleted": False,
                     }
                 )
                 # Also update last_active metadata so UI remains on this chat after reload
