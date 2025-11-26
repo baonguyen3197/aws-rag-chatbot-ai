@@ -1070,16 +1070,16 @@ nginx-ingress: &nginx-ingress
     publishService:
       enabled: true
     service:
-      # type: LoadBalancer
-      # externalTrafficPolicy: "Cluster"
-      # annotations:
-      #   service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-      #   service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
-      #   service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
-      type: NodePort
+      type: LoadBalancer
       externalTrafficPolicy: "Cluster"
-      nodePorts:
-        http: 32001
+      annotations:
+        service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+        service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
+        service.beta.kubernetes.io/aws-load-balancer-target-type: "ip"
+      ports:
+        http: 80
+        https: 443
     ingressClassByName: false
     ingressClassResource:
       name: '{{ include "ingress.class.name" $ | quote }}'

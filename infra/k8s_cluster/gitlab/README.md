@@ -43,14 +43,6 @@ helm upgrade --install gitlab gitlab/gitlab \
   -f ./gitlab/gitlab-values.yaml
 ```
 
-```powershell
-kubectl annotate storageclass gp2-csi storageclass.kubernetes.io/is-default-class=true --overwrite
-
-helm upgrade --install gitlab gitlab/gitlab `
-    -n gitlab `
-  -f .\gitlab\gitlab-values.yaml
-```
-
 ## Check status
 ```bash
 helm status gitlab -n gitlab
@@ -60,10 +52,6 @@ helm status gitlab -n gitlab
 ```bash
 kubectl get secret gitlab-gitlab-initial-root-password -n gitlab -ojsonpath='{.data.password}' | base64 --decode ; echo
 ```
-
-```powershell
-kubectl get secret gitlab-gitlab-initial-root-password -n gitlab -ojsonpath='{.data.password}' | ForEach-Object { [System.Text.Encoding]::UTF8.GetString([Convert]::FromBase64String($_)) }
-``` 
 
 ## Uninstall GitLab
 ```bash
