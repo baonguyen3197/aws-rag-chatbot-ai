@@ -3,10 +3,8 @@ stages:
   - sync
 
 variables:
-  APP_DIR: "react-nginx-argocd/app"
+  APP_DIR: "aws_rag_chatbot_ai/"
   DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/react-nginx-argocd"
-  DOCKERHUB_USERNAME: "nhqb3197"
-  DOCKERHUB_TOKEN: "dckr_pat_782G9N8hHn0bkRy1m8ke3vIXMe4"
   ARGOCD_BASE_URL: "http://argocd-server.argocd.svc.cluster.local"
   ARGOCD_SERVER: "argocd-server.argocd.svc.cluster.local:80"
   ARGOCD_AUTH_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJuaHFiOmFwaUtleSIsIm5iZiI6MTc2NDE2OTEyNSwiaWF0IjoxNzY0MTY5MTI1LCJqdGkiOiI2MzliMzgyYy1iNDk2LTQ3OTItOWYyOS05MzBkMTIyY2Q1OTUifQ.bk8TtLzCewFKdZkGJQi74gjuLLWloHFzo_vmhpiHlko"
