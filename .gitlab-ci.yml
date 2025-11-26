@@ -29,8 +29,9 @@ build-and-push:
       if [ -z "$IMAGE_TAG" ]; then
         IMAGE_TAG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}
       fi
-      # write dotenv artifact into project dir so GitLab can upload it reliably
-      echo "IMAGE_TAG=$IMAGE_TAG" > "$CI_PROJECT_DIR/build.env"
+      # ensure we are in the project working directory and write dotenv artifact there
+      cd "$CI_PROJECT_DIR"
+      echo "IMAGE_TAG=$IMAGE_TAG" > build.env
     - |
       if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
         echo "ERROR: Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in CI/CD variables" >&2
