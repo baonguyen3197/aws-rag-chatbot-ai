@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: aws-rag-chatbot-config
+data:
+  # Non-sensitive configuration values for the chatbot application
+  CHATBOT_ENV: "dev"
+  CHATBOT_LOG_LEVEL: "info"
+  # Example: external service endpoint (non-secret)
+  VECTOR_DB_ENDPOINT: "http://vector-db.default.svc.cluster.local:8000"

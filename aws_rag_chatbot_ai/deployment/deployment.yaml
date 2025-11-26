@@ -1,0 +1,55 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: aws-rag-chatbot
+  labels:
+    app: aws-rag-chatbot
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: aws-rag-chatbot
+  template:
+    metadata:
+      labels:
+        app: aws-rag-chatbot
+    spec:
+      containers:
+        - name: aws-rag-chatbot
+          image: docker.io/nhqb3197/aws_rag_chatbot_ai:latest
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+              name: http-frontend
+            - containerPort: 8000
+              name: http-backend
+          envFrom:
+            - configMapRef:
+                name: aws-rag-chatbot-config
+            # Sensitive values should be provided via a Kubernetes Secret named
+            # `aws-rag-chatbot-secret` in the target namespace. Create it using
+            # the kubectl commands shown in the repository README or below.
+            - secretRef:
+                name: aws-rag-chatbot-secret
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http-frontend
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 2
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http-frontend
+            initialDelaySeconds: 30
+            periodSeconds: 20
+            timeoutSeconds: 2
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"

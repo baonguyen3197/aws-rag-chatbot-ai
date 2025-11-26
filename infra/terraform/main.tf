@@ -40,11 +40,12 @@ module "eks" {
   vpc_id             = module.vpc.vpc_id
   # enable the managed EKS addons; attach existing nhqb-EBS role to EBS CSI and Pod Identity Agent
   ebs_role_name             = "nhqb-EBS"
-  enable_ebs_addon          = true
+  enable_ebs_addon          = var.enable_ebs_addon
   enable_addon_vpc_cni      = true
   enable_addon_coredns      = true
   enable_addon_kube_proxy   = true
   enable_addon_pod_identity = true
+  create_iam_oidc_provider  = var.create_iam_oidc_provider
   # pass existing role ARNs so the addons attach to the nhqb-EBS role
   ebs_service_account_role_arn          = "arn:aws:iam::906034468113:role/nhqb-EBS"
   pod_identity_service_account_role_arn = "arn:aws:iam::906034468113:role/nhqb-EBS"

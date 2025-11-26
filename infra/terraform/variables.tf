@@ -58,3 +58,15 @@ variable "node_instance_type" {
   type        = string
   default     = "m5.xlarge"
 }
+
+variable "enable_ebs_addon" {
+  description = "Whether to enable the EBS CSI addon (forwarded into the eks module)"
+  type        = bool
+  default     = true
+}
+
+variable "create_iam_oidc_provider" {
+  description = "Whether to create the IAM OIDC provider for the cluster (forwarded into the eks module)"
+  type        = bool
+  default     = true
+}

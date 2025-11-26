@@ -19,7 +19,7 @@ helm upgrade --install gitlab gitlab/gitlab \
   --create-namespace \
   -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
   --set global.hosts.domain=nhqb-gitlab.duckdns.org \
-  --set global.hosts.externalIP=10.0.0.146 \
+  --set global.hosts.externalIP=10.0.0.161 \
   --set certmanager-issuer.email=baonguyen3197@gmail.com \
   --namespace gitlab
 ```
@@ -30,11 +30,14 @@ kubectl apply -f ./infra/k8s_cluster/gitlab/gp2-csi.yaml
 kubectl patch storageclass gp2-csi -p '{"metadata": {"annotations":{"storageclass.kubernetes.io/is-default-class":"true"}}}'
 
 helm upgrade --install gitlab gitlab/gitlab -n gitlab -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml
+```
 
+## Apply Ingress
+```bash
 kubectl apply -f ./infra/k8s_cluster/gitlab/gitlab-ingress.yaml
 
-kubectl create namespace ingress-nginx
-kubectl apply -f ./infra/k8s_cluster/ingress/nginx-internal-svc.yaml
+# kubectl create namespace ingress-nginx
+# kubectl apply -f ./infra/k8s_cluster/ingress/nginx-internal-svc.yaml
 ```
 
 ```bash

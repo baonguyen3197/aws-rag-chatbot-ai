@@ -9,7 +9,11 @@ variables:
   DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/aws_rag_chatbot_ai"
   ARGOCD_BASE_URL: "http://argocd-server.argocd.svc.cluster.local"
   ARGOCD_SERVER: "argocd-server.argocd.svc.cluster.local:80"
-  ARGOCD_AUTH_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJuaHFiOmFwaUtleSIsIm5iZiI6MTc2NDE2OTEyNSwiaWF0IjoxNzY0MTY5MTI1LCJqdGkiOiI2MzliMzgyYy1iNDk2LTQ3OTItOWYyOS05MzBkMTIyY2Q1OTUifQ.bk8TtLzCewFKdZkGJQi74gjuLLWloHFzo_vmhpiHlko"
+  # Prefer storing the ArgoCD token in a Kubernetes Secret and letting CI read it from cluster.
+  # If you still want to set the ArgoCD token in CI variables, leave ARGOCD_AUTH_TOKEN set there.
+  ARGOCD_AUTH_TOKEN: ""
+  ARGOCD_AUTH_SECRET: "argocd-auth"
+  ARGOCD_AUTH_SECRET_NS: "argocd"
   ARGOCD_APP: "aws-rag-chatbot-ai"
   ARGOCD_PLAINTEXT: true
 
@@ -45,7 +49,7 @@ build-and-push:
         DEST_ARGS="$DEST_ARGS --destination docker.io/$DOCKERHUB_IMAGE:latest"
       fi
       /kaniko/executor \
-        --context $CI_PROJECT_DIR/$APP_DIR \
+        --context $CI_PROJECT_DIR \
         --dockerfile $CI_PROJECT_DIR/$APP_DIR/Dockerfile \
         --cache=true \
         $DEST_ARGS
@@ -57,7 +61,7 @@ build-and-push:
 argocd-sync:
   stage: sync
   tags: ["k8s"]
-  image: curlimages/curl:8.10.1
+  image: bitnami/kubectl:1.29.6
   needs: ["build-and-push"]
   rules:
     - if: '$CI_COMMIT_BRANCH'
@@ -66,8 +70,21 @@ argocd-sync:
       set -e
       : "${ARGOCD_BASE_URL:=http://argocd-server.argocd.svc.cluster.local}"
       : "${ARGOCD_APP:=react-nginx-dev}"
+      # If ARGOCD_AUTH_TOKEN is not set as a CI variable, try reading it from a Kubernetes Secret
       if [ -z "${ARGOCD_AUTH_TOKEN:-}" ]; then
-        echo "ERROR: set ARGOCD_AUTH_TOKEN CI variable" >&2; exit 1; fi
+        if kubectl get secret "${ARGOCD_AUTH_SECRET}" -n "${ARGOCD_AUTH_SECRET_NS}" >/dev/null 2>&1; then
+          ARGOCD_AUTH_TOKEN=$(kubectl -n "${ARGOCD_AUTH_SECRET_NS}" get secret "${ARGOCD_AUTH_SECRET}" -o jsonpath='{.data.token}' | base64 -d)
+          echo "Fetched ARGOCD token from k8s secret ${ARGOCD_AUTH_SECRET}/${ARGOCD_AUTH_SECRET_NS}" >&2
+        else
+          echo "ERROR: ARGOCD_AUTH_TOKEN not set and Kubernetes secret ${ARGOCD_AUTH_SECRET} not found in namespace ${ARGOCD_AUTH_SECRET_NS}" >&2
+          exit 1
+        fi
+      fi
+
+      # Ensure curl is available in this image; install if needed
+      if ! command -v curl >/dev/null 2>&1; then
+        apt-get update && apt-get install -y --no-install-recommends curl ca-certificates >/dev/null 2>&1 || true
+      fi
       curl -fsS -X POST \
         -H "Authorization: Bearer ${ARGOCD_AUTH_TOKEN}" \
         -H "Content-Type: application/json" \
