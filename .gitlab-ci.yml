@@ -3,7 +3,7 @@ stages:
   - sync
 
 variables:
-  APP_DIR: "aws_rag_chatbot_ai/"
+  APP_DIR: "."
   DOCKERHUB_USERNAME: "nhqb3197"
   DOCKERHUB_TOKEN: "dckr_pat_782G9N8hHn0bkRy1m8ke3vIXMe4"
   DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/aws_rag_chatbot_ai"
