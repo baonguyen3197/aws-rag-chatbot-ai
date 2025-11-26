@@ -1,0 +1,34 @@
+# Use the official Python 3.11 slim image as the base
+FROM python:3.11-slim
+
+# Set the working directory in the container
+WORKDIR /app
+
+# Install minimal system dependencies needed for runtime and build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+        gcc \
+        curl \
+        ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy and install Python requirements from the app directory (cache-friendly)
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application package
+COPY aws_rag_chatbot_ai/ ./aws_rag_chatbot_ai/
+COPY rxconfig.py ./
+
+# Copy assets that are part of the app directory (if present)
+COPY assets/ ./assets/
+COPY .web/ ./.web/
+
+# Create unprivileged user for runtime
+RUN useradd --create-home appuser && chown -R appuser:appuser /app
+USER appuser
+
+# Expose application ports (adjust as needed)
+EXPOSE 3000 8000
+
+# Default command - ensure `reflex` is installed via requirements
+CMD ["reflex", "run", "--env", "prod"]

@@ -1,0 +1,177 @@
+# Namespace for Nginx Proxy Manager
+---
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: npm
+
+# Secret for Nginx Proxy Manager Database
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: npm-db-secret
+  namespace: npm
+type: Opaque
+stringData:
+  MYSQL_ROOT_PASSWORD: "admin@123"
+  MYSQL_DATABASE: "npm"
+  MYSQL_USER: "npm"
+  MYSQL_PASSWORD: "admin@123"
+
+# MariaDB StatefulSet for Nginx Proxy Manager
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: npm-mariadb
+  namespace: npm
+spec:
+  selector:
+    app: npm-mariadb
+  ports:
+    - name: mysql
+      port: 3306
+      targetPort: 3306
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: npm-mariadb
+  namespace: npm
+spec:
+  serviceName: npm-mariadb
+  replicas: 1
+  selector:
+    matchLabels:
+      app: npm-mariadb
+  template:
+    metadata:
+      labels:
+        app: npm-mariadb
+    spec:
+      containers:
+        - name: mariadb
+          image: mariadb:10.11
+          ports:
+            - name: mysql
+              containerPort: 3306
+          envFrom:
+            - secretRef:
+                name: npm-db-secret
+          env:
+            - name: MARIADB_AUTO_UPGRADE
+              value: "1"
+          volumeMounts:
+            - name: data
+              mountPath: /var/lib/mysql
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes: ["ReadWriteOnce"]
+        storageClassName: gp2
+        resources:
+          requests:
+            storage: 10Gi
+
+# Nginx Proxy Manager Service
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: npm
+  namespace: npm
+spec:
+  type: NodePort
+  selector:
+    app: npm
+  ports:
+    - name: http
+      port: 80
+      targetPort: 80
+      nodePort: 32002
+    - name: https
+      port: 443
+      targetPort: 443
+      nodePort: 32043
+    - name: admin
+      port: 81
+      targetPort: 81
+      nodePort: 32081
+
+# Nginx Proxy Manager Deployment
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: npm
+  namespace: npm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: npm
+  template:
+    metadata:
+      labels:
+        app: npm
+    spec:
+      dnsPolicy: ClusterFirst
+      containers:
+        - name: app
+          image: jc21/nginx-proxy-manager:2
+          ports:
+            - containerPort: 80
+            - containerPort: 443
+            - containerPort: 81
+          env:
+            - name: DB_MYSQL_HOST
+              value: npm-mariadb.npm.svc.cluster.local
+            - name: DB_MYSQL_PORT
+              value: "3306"
+            - name: DB_MYSQL_USER
+              valueFrom:
+                secretKeyRef:
+                  name: npm-db-secret
+                  key: MYSQL_USER
+            - name: DB_MYSQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: npm-db-secret
+                  key: MYSQL_PASSWORD
+            - name: DB_MYSQL_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: npm-db-secret
+                  key: MYSQL_DATABASE
+          volumeMounts:
+            - name: npm-data
+              mountPath: /data
+            - name: npm-letsencrypt
+              mountPath: /etc/letsencrypt
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 81
+            initialDelaySeconds: 30
+            periodSeconds: 30
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 81
+            initialDelaySeconds: 15
+            periodSeconds: 15
+          resources:
+            requests:
+              cpu: 100m
+              memory: 256Mi
+      volumes:
+        - name: npm-data
+          emptyDir: {}
+        - name: npm-letsencrypt
+          emptyDir: {}
