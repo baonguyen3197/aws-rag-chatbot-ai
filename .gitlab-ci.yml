@@ -5,11 +5,8 @@ stages:
 variables:
   APP_DIR: "aws_rag_chatbot_ai/"
   DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/react-nginx-argocd"
-  DOCKERHUB_USERNAME: "nhqb3197"
-  DOCKERHUB_TOKEN: "dckr_pat_782G9N8hHn0bkRy1m8ke3vIXMe4"
   ARGOCD_BASE_URL: "http://argocd-server.argocd.svc.cluster.local"
   ARGOCD_SERVER: "argocd-server.argocd.svc.cluster.local:80"
-  ARGOCD_AUTH_TOKEN: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJhcmdvY2QiLCJzdWIiOiJuaHFiOmFwaUtleSIsIm5iZiI6MTc2NDE2OTEyNSwiaWF0IjoxNzY0MTY5MTI1LCJqdGkiOiI2MzliMzgyYy1iNDk2LTQ3OTItOWYyOS05MzBkMTIyY2Q1OTUifQ.bk8TtLzCewFKdZkGJQi74gjuLLWloHFzo_vmhpiHlko"
   ARGOCD_APP: "react-nginx-dev"
   ARGOCD_PLAINTEXT: true
 
@@ -32,7 +29,8 @@ build-and-push:
       if [ -z "$IMAGE_TAG" ]; then
         IMAGE_TAG=${CI_COMMIT_TAG:-$CI_COMMIT_SHORT_SHA}
       fi
-      echo "IMAGE_TAG=$IMAGE_TAG" > build.env
+      # write dotenv artifact into project dir so GitLab can upload it reliably
+      echo "IMAGE_TAG=$IMAGE_TAG" > "$CI_PROJECT_DIR/build.env"
     - |
       if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
         echo "ERROR: Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in CI/CD variables" >&2
