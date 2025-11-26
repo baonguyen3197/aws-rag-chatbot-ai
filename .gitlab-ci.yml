@@ -5,7 +5,7 @@ stages:
 variables:
   APP_DIR: "."
   DOCKERHUB_USERNAME: "nhqb3197"
-  DOCKERHUB_TOKEN: "dckr_pat_782G9N8hHn0bkRy1m8ke3vIXMe4"
+  DOCKERHUB_TOKEN: "${DOCKERHUB_TOKEN}"
   DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/aws_rag_chatbot_ai"
   ARGOCD_BASE_URL: "http://argocd-server.argocd.svc.cluster.local"
   ARGOCD_SERVER: "argocd-server.argocd.svc.cluster.local:80"
