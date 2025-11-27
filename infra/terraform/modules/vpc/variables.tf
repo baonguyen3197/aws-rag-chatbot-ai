@@ -11,7 +11,7 @@ variable "azs" {
 variable "project_name" {
   description = "Small terraform project"
   type        = string
-  default     = "nhqb-terraform"
+  default     = "ttb-terraform"
 }
 
 variable "public_subnets" {
