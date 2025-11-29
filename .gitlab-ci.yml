@@ -4,9 +4,9 @@ stages:
 
 variables:
   APP_DIR: "."
-  DOCKERHUB_USERNAME: "nhqb3197"
-  DOCKERHUB_TOKEN: "regcred"
-  DOCKERHUB_IMAGE: "$DOCKERHUB_USERNAME/aws_rag_chatbot_ai"
+  DOCKERHUB_IMAGE: "nhqb3197/aws_rag_chatbot_ai"
+  # DOCKER_USERNAME and DOCKER_PASSWORD should be set in GitLab CI/CD Variables
+  # Go to: Settings → CI/CD → Variables
   ARGOCD_BASE_URL: "http://argocd-server.argocd.svc.cluster.local"
   ARGOCD_SERVER: "argocd-server.argocd.svc.cluster.local:80"
   # Prefer storing the ArgoCD token in a Kubernetes Secret and letting CI read it from cluster.
@@ -28,8 +28,8 @@ build-and-push:
   script:
     - echo "IMAGE_TAG=latest" > build.env
     - |
-      if [ -z "$DOCKERHUB_USERNAME" ] || [ -z "$DOCKERHUB_TOKEN" ]; then
-        echo "ERROR: Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN in CI/CD variables" >&2
+      if [ -z "$DOCKER_USERNAME" ] || [ -z "$DOCKER_PASSWORD" ]; then
+        echo "ERROR: Set DOCKER_USERNAME and DOCKER_PASSWORD in CI/CD variables" >&2
         exit 1
       fi
     - |
@@ -40,7 +40,7 @@ build-and-push:
     - |
       mkdir -p /kaniko/.docker
       cat > /kaniko/.docker/config.json <<EOF
-      {"auths": {"https://index.docker.io/v1/": {"username": "$DOCKERHUB_USERNAME", "password": "$DOCKERHUB_TOKEN"}}}
+      {"auths": {"https://index.docker.io/v1/": {"username": "$DOCKER_USERNAME", "password": "$DOCKER_PASSWORD"}}}
       EOF
     - |
       IMAGE_TAG=latest
