@@ -37,16 +37,18 @@ module "eks" {
   node_instance_type = var.node_instance_type
 
   private_subnet_ids = module.vpc.private_subnet_ids
+  public_subnet_ids  = module.vpc.public_subnet_ids
+  use_public_subnets = var.use_public_subnets
   vpc_id             = module.vpc.vpc_id
-  # enable the managed EKS addons; attach existing ttb-EBS role to EBS CSI and Pod Identity Agent
-  ebs_role_name             = "ttb-EBS"
+  # enable the managed EKS addons; attach existing nhqb-EBS role to EBS CSI and Pod Identity Agent
+  ebs_role_name             = "nhqb-EBS"
   enable_ebs_addon          = var.enable_ebs_addon
   enable_addon_vpc_cni      = true
   enable_addon_coredns      = true
   enable_addon_kube_proxy   = true
   enable_addon_pod_identity = true
   create_iam_oidc_provider  = var.create_iam_oidc_provider
-  # pass existing role ARNs so the addons attach to the ttb-EBS role
-  ebs_service_account_role_arn          = "arn:aws:iam::906034468113:role/ttb-EBS"
-  pod_identity_service_account_role_arn = "arn:aws:iam::906034468113:role/ttb-EBS"
+  # pass existing role ARNs so the addons attach to the nhqb-EBS role
+  ebs_service_account_role_arn          = "arn:aws:iam::906034468113:role/nhqb-EBS"
+  pod_identity_service_account_role_arn = "arn:aws:iam::906034468113:role/nhqb-EBS"
 }

@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Project name prefix"
   type        = string
-  default     = "ttb-terraform"
+  default     = "nhqb-terraform"
 }
 
 variable "aws_region" {
@@ -69,4 +69,10 @@ variable "create_iam_oidc_provider" {
   description = "Whether to create the IAM OIDC provider for the cluster (forwarded into the eks module)"
   type        = bool
   default     = true
+}
+
+variable "use_public_subnets" {
+  description = "Deploy EKS nodes in public subnets to enable HTTP-01 ACME challenges (nodes get public IPs)"
+  type        = bool
+  default     = false
 }

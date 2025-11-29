@@ -13,6 +13,18 @@ variable "private_subnet_ids" {
   description = "Private subnet IDs for node groups"
 }
 
+variable "public_subnet_ids" {
+  type        = list(string)
+  description = "Public subnet IDs for node groups (optional, for nodes with public IPs)"
+  default     = []
+}
+
+variable "use_public_subnets" {
+  type        = bool
+  description = "Whether to deploy nodes in public subnets instead of private"
+  default     = false
+}
+
 variable "eks_cluster_role" {
   type        = string
   description = "ARN of the IAM role to use for the EKS control plane"
@@ -80,7 +92,7 @@ variable "create_iam_oidc_provider" {
 variable "ebs_role_name" {
   description = "IAM role name to create for EBS CSI (IRSA)"
   type        = string
-  default     = "ttb-terraform-EBS"
+  default     = "nhqb-terraform-EBS"
 }
 
 variable "enable_addon_vpc_cni" {

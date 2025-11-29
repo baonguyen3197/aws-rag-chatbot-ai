@@ -14,7 +14,7 @@ resource "aws_eks_node_group" "default" {
     node_role_arn  = var.node_role_arn
     node_group_name = "${var.cluster_name}-node-group"
     
-    subnet_ids     = var.private_subnet_ids
+    subnet_ids     = var.use_public_subnets ? var.public_subnet_ids : var.private_subnet_ids
     instance_types = [var.node_instance_type]
     
     scaling_config {
@@ -88,7 +88,7 @@ resource "aws_iam_policy" "ebs_csi" {
 }
 
 # IAM role for EBS CSI driver (IRSA)
-resource "aws_iam_role" "ttb_terraform_ebs" {
+resource "aws_iam_role" "nhqb_terraform_ebs" {
         count = var.enable_ebs_addon ? 1 : 0
         name  = var.ebs_role_name
 
@@ -115,7 +115,7 @@ POLICY
 
 resource "aws_iam_role_policy_attachment" "ebs_attach" {
         count      = var.enable_ebs_addon ? 1 : 0
-        role       = aws_iam_role.ttb_terraform_ebs[0].name
+        role       = aws_iam_role.nhqb_terraform_ebs[0].name
         policy_arn = aws_iam_policy.ebs_csi[0].arn
 }
 
@@ -130,7 +130,7 @@ resource "aws_eks_addon" "ebs" {
   service_account_role_arn = (
     length(var.ebs_service_account_role_arn) > 0
     ? var.ebs_service_account_role_arn
-    : aws_iam_role.ttb_terraform_ebs[0].arn
+    : aws_iam_role.nhqb_terraform_ebs[0].arn
   )
 
   # Required with recent AWS provider versions
@@ -139,7 +139,7 @@ resource "aws_eks_addon" "ebs" {
 
   depends_on = [
         aws_eks_node_group.default,          # your node group resource
-        aws_iam_role.ttb_terraform_ebs[0],  # role for CSI addon (indexed because of count)
+        aws_iam_role.nhqb_terraform_ebs[0],  # role for CSI addon (indexed because of count)
         aws_iam_openid_connect_provider.oidc[0]
   ]
 }
