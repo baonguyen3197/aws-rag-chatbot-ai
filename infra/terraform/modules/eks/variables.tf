@@ -65,6 +65,12 @@ variable "node_instance_type" {
   default     = "m5.xlarge"
 }
 
+variable "node_volume_size" {
+  description = "Disk size in GiB for EKS worker nodes"
+  type        = number
+  default     = 20
+}
+
 variable "enable_ebs_addon" {
   description = "Whether to create the EBS CSI addon and related IAM role/policy"
   type        = bool

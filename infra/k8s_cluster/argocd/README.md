@@ -28,12 +28,7 @@ kubectl create secret docker-registry regcred \
   --docker-email=<you@example.com> \
   -n argocd
 ```
-kubectl create secret docker-registry regcred \
-  --docker-server=https://index.docker.io/v1/ \
-  --docker-username=nhqb3197 \
-  --docker-password=dckr_pat_782G9N8hHn0bkRy1m8ke3vIXMe4 \
-  --docker-email=baonguyen3197@gmail.com \
-  -n argocd
+
 ============================
 ```bash
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml

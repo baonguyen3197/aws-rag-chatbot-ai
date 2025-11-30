@@ -14,13 +14,13 @@ aws eks --region ap-northeast-1 describe-addon --cluster-name nhqb-terraform-k8s
 # bash
 helm repo add gitlab https://charts.gitlab.io/
 helm repo update
-helm upgrade --install gitlab gitlab/gitlab \
-  -n gitlab \
-  --create-namespace \
-  --set global.hosts.domain=nhqb-gitlab.duckdns.org \
-  --set global.hosts.externalIP=54.250.201.193 \
-  -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
-  --set certmanager-issuer.email=baonguyen3197@gmail.com \
+helm upgrade --install gitlab gitlab/gitlab `
+  -n gitlab `
+  --create-namespace `
+  --set global.hosts.domain=nhqb-gitlab.duckdns.org `
+  --set global.hosts.externalIP=18.183.105.100 `
+  -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml `
+  --set certmanager-issuer.email=baonguyen3197@gmail.com `
   --namespace gitlab
 
 helm upgrade --install gitlab gitlab/gitlab \

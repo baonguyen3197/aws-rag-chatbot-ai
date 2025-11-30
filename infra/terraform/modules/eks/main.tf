@@ -16,6 +16,7 @@ resource "aws_eks_node_group" "default" {
     
     subnet_ids     = var.use_public_subnets ? var.public_subnet_ids : var.private_subnet_ids
     instance_types = [var.node_instance_type]
+    disk_size      = var.node_volume_size
     
     scaling_config {
         desired_size = var.node_desired_size
