@@ -1074,7 +1074,7 @@ nginx-ingress: &nginx-ingress
       externalTrafficPolicy: "Cluster"
       annotations:
         service.beta.kubernetes.io/aws-load-balancer-type: "nlb"
-        service.beta.kubernetes.io/aws-load-balancer-scheme: "internal"
+        service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
         service.beta.kubernetes.io/aws-load-balancer-cross-zone-load-balancing-enabled: "true"
         service.beta.kubernetes.io/aws-load-balancer-target-type: "ip"
       ports:
@@ -1525,6 +1525,15 @@ gitlab-runner:
         image = "ubuntu:22.04"
         namespace = "gitlab"
         poll_timeout = 180
+        # Resource limits for build pods
+        cpu_request = "1000m"
+        cpu_limit = "2000m"
+        memory_request = "2Gi"
+        memory_limit = "4Gi"
+        helper_cpu_request = "100m"
+        helper_cpu_limit = "500m"
+        helper_memory_request = "128Mi"
+        helper_memory_limit = "512Mi"
         {{- if .Values.global.minio.enabled }}
         [runners.cache]
           Type = "s3"
