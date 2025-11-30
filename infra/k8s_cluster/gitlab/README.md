@@ -3,7 +3,7 @@
 ## Get AWS K8s config
 ```bash
 aws eks --region <region> update-kubeconfig --name <cluster_name>
-aws eks --region ap-northeast-1 update-kubeconfig --name nhqb-terraform-k8s-cluster
+aws eks --region ap-northeast-1 update-kubeconfig --name ttb-terraform-k8s-cluster
 
 # Check status:
 aws eks --region ap-northeast-1 describe-addon --cluster-name nhqb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
@@ -18,9 +18,18 @@ helm upgrade --install gitlab gitlab/gitlab \
   -n gitlab \
   --create-namespace \
   --set global.hosts.domain=nhqb-gitlab.duckdns.org \
-  --set global.hosts.externalIP=10.0.0.187 \
+  --set global.hosts.externalIP=54.250.201.193 \
   -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
   --set certmanager-issuer.email=baonguyen3197@gmail.com \
+  --namespace gitlab
+
+helm upgrade --install gitlab gitlab/gitlab \
+  -n gitlab \
+  --create-namespace \
+  -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml \
+  --set certmanager-issuer.email=baonguyen3197@gmail.com \
+  --set nginx-ingress.controller.service.annotations."service\.beta\.kubernetes\.io/aws-load-balancer-scheme"=internet-facing \
+  --set global.hosts.domain=nhqb-gitlab.duckdns.org \
   --namespace gitlab
 ```
 
@@ -79,3 +88,6 @@ kubectl create secret docker-registry regcred `
   --docker-email=<you@example.com> `
   -n gitlab
 ```
+
+
+ERROR: Job failed (system failure): pod "gitlab/runner-z2s1d3cda-project-2-concurrent-0-555yux86" is disrupted: reason "TerminationByKubelet", message "The node was low on resource: ephemeral-storage. Threshold quantity: 2139512454, available: 979984Ki. Container build was using 6624724Ki, request is 0, has larger consumption of ephemeral-storage. Container helper was using 8Ki, request is 0, has larger consumption of ephemeral-storage. "
