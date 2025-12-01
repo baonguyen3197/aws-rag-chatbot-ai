@@ -25,8 +25,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy Python packages from builder
-COPY --from=builder /root/.local /root/.local
+# Copy Python packages from builder to a user-accessible location
+COPY --from=builder /root/.local /opt/venv
 
 # Copy application code
 COPY aws_rag_chatbot_ai/ ./aws_rag_chatbot_ai/
@@ -34,10 +34,12 @@ COPY rxconfig.py ./
 COPY assets/ ./assets/
 
 # Create unprivileged user and set ownership
-RUN useradd --create-home appuser && chown -R appuser:appuser /app
+RUN useradd --create-home appuser && \
+    chown -R appuser:appuser /app && \
+    chown -R appuser:appuser /opt/venv
 
 # Update PATH to include user-installed packages
-ENV PATH=/root/.local/bin:$PATH
+ENV PATH=/opt/venv/bin:$PATH
 
 USER appuser
 
