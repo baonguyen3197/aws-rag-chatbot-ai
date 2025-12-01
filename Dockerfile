@@ -24,9 +24,11 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install minimal runtime dependencies
+# Install minimal runtime dependencies (unzip needed for Reflex/Bun)
 RUN apt-get update && apt-get install -y --no-install-recommends \
         ca-certificates \
+        unzip \
+        curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
