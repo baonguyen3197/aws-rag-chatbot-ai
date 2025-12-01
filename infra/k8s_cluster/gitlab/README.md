@@ -6,7 +6,7 @@ aws eks --region <region> update-kubeconfig --name <cluster_name>
 aws eks --region ap-northeast-1 update-kubeconfig --name ttb-terraform-k8s-cluster
 
 # Check status:
-aws eks --region ap-northeast-1 describe-addon --cluster-name nhqb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
+aws eks --region ap-northeast-1 describe-addon --cluster-name ttb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
 ```
 ============================
 ## Install GitLab with Helm

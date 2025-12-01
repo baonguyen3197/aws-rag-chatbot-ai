@@ -48,5 +48,5 @@ terraform destroy
 ### EKS Module
 ```bash
 # Check EKS Cluster Status
-aws eks describe-addon --cluster-name nhqb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
+aws eks describe-addon --cluster-name ttb-terraform-k8s-cluster --addon-name aws-ebs-csi-driver
 ```

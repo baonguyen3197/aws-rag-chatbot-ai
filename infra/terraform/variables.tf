@@ -1,7 +1,7 @@
 variable "project_name" {
   description = "Project name prefix"
   type        = string
-  default     = "nhqb-terraform"
+  default     = "ttb-terraform"
 }
 
 variable "aws_region" {

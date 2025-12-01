@@ -98,7 +98,7 @@ variable "create_iam_oidc_provider" {
 variable "ebs_role_name" {
   description = "IAM role name to create for EBS CSI (IRSA)"
   type        = string
-  default     = "nhqb-terraform-EBS"
+  default     = "ttb-terraform-EBS"
 }
 
 variable "enable_addon_vpc_cni" {
