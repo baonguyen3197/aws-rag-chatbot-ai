@@ -2,6 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: aws-rag-chatbot-config
+  namespace: chatbot
 data:
   # Non-sensitive configuration values for the chatbot application
   CHATBOT_ENV: "dev"

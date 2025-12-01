@@ -18,7 +18,7 @@ helm upgrade --install gitlab gitlab/gitlab `
   -n gitlab `
   --create-namespace `
   --set global.hosts.domain=nhqb-gitlab.duckdns.org `
-  --set global.hosts.externalIP=18.183.105.100 `
+  --set global.hosts.externalIP=43.207.149.160 `
   -f ./infra/k8s_cluster/gitlab/gitlab-values.yaml `
   --set certmanager-issuer.email=baonguyen3197@gmail.com `
   --namespace gitlab
