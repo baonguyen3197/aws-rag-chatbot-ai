@@ -15,6 +15,9 @@ spec:
       labels:
         app: aws-rag-chatbot
     spec:
+      imagePullSecrets:
+        - name: regcred
+      terminationGracePeriodSeconds: 30
       containers:
         - name: aws-rag-chatbot
           image: docker.io/nhqb3197/aws_rag_chatbot_ai:latest

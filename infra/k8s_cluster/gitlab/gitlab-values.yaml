@@ -1525,15 +1525,20 @@ gitlab-runner:
         image = "ubuntu:22.04"
         namespace = "gitlab"
         poll_timeout = 180
-        # Resource limits for build pods
-        cpu_request = "1000m"
-        cpu_limit = "2000m"
-        memory_request = "2Gi"
-        memory_limit = "4Gi"
-        helper_cpu_request = "100m"
-        helper_cpu_limit = "500m"
-        helper_memory_request = "128Mi"
-        helper_memory_limit = "512Mi"
+        # Increased resource limits for Kaniko Docker builds (very memory-intensive)
+        cpu_request = "2000m"
+        cpu_limit = "4000m"
+        memory_request = "4Gi"
+        memory_limit = "8Gi"
+        # Increase ephemeral storage for Docker layer caching
+        ephemeral_storage_request = "10Gi"
+        ephemeral_storage_limit = "20Gi"
+        helper_cpu_request = "200m"
+        helper_cpu_limit = "1000m"
+        helper_memory_request = "256Mi"
+        helper_memory_limit = "1Gi"
+        # Allow pods to have additional time during heavy builds
+        pod_annotations = "cluster-autoscaler.kubernetes.io/safe-to-evict=false"
         {{- if .Values.global.minio.enabled }}
         [runners.cache]
           Type = "s3"

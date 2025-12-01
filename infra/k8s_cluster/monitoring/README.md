@@ -11,6 +11,6 @@ helm install prometheus prometheus-community/prometheus --namespace prometheus -
 kubectl patch svc grafana -n grafana -p '{\"spec\":{\"type\": \"LoadBalancer\"}}'
 
 http://prometheus-server.monitoring.svc.cluster.local
-http://loki-loki-distributed-gateway.loki.svc.cluster.local
+http://loki-gateway.loki.svc.cluster.local
 
 1860
