@@ -1525,11 +1525,10 @@ gitlab-runner:
         image = "ubuntu:22.04"
         namespace = "gitlab"
         poll_timeout = 180
-        # Increased resource limits for Kaniko Docker builds (very memory-intensive)
-        cpu_request = "2000m"
-        cpu_limit = "4000m"
-        memory_request = "4Gi"
-        memory_limit = "8Gi"
+        cpu_request = "4000m"
+        cpu_limit = "8000m"
+        memory_request = "8Gi"
+        memory_limit = "16Gi"
         # Increase ephemeral storage for Docker layer caching
         ephemeral_storage_request = "10Gi"
         ephemeral_storage_limit = "20Gi"

@@ -10,38 +10,38 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
         make \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy and install Python dependencies
+# Copy and install Python dependencies to /opt/venv
 COPY requirements.txt ./
-RUN pip install --no-cache-dir --user -r requirements.txt
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+RUN pip install --no-cache-dir -r requirements.txt && \
+    find /opt/venv -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true && \
+    find /opt/venv -type f -name "*.pyc" -delete && \
+    find /opt/venv -type f -name "*.pyo" -delete
 
 # Stage 2: Production
 FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install only runtime dependencies
+# Install minimal runtime dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        curl \
         ca-certificates \
-    && rm -rf /var/lib/apt/lists/*
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-# Copy Python packages from builder to a user-accessible location
-COPY --from=builder /root/.local /opt/venv
+# Copy Python packages from builder
+COPY --from=builder /opt/venv /opt/venv
 
 # Copy application code
 COPY aws_rag_chatbot_ai/ ./aws_rag_chatbot_ai/
 COPY rxconfig.py ./
 COPY assets/ ./assets/
 
-# Create unprivileged user and set ownership
-RUN useradd --create-home appuser && \
-    chown -R appuser:appuser /app && \
-    chown -R appuser:appuser /opt/venv
-
-# Update PATH to include user-installed packages
-ENV PATH=/opt/venv/bin:$PATH
-
-USER appuser
+# Update PATH and environment
+ENV PATH=/opt/venv/bin:$PATH \
+    PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1
 
 # Expose application ports
 EXPOSE 3000 8000

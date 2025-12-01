@@ -21,7 +21,7 @@ spec:
       containers:
         - name: aws-rag-chatbot
           image: docker.io/nhqb3197/aws_rag_chatbot_ai:latest
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - containerPort: 3000
               name: http-frontend
