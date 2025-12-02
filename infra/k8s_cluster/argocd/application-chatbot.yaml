@@ -1,0 +1,43 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: aws-rag-chatbot-ai
+  namespace: argocd
+  annotations:
+    argocd.argoproj.io/sync-wave: "10"
+spec:
+  project: default
+  source:
+    # Replace repoURL with the repository Argo CD can reach (GitLab internal LB or public GitHub)
+    # Example (GitLab internal): http://a0e663bf7097e4bbcb54930ec42a38fa-1f7b96206a0bab97.elb.ap-northeast-1.amazonaws.com/root/aws-rag-chatbot-ai.git
+    # Example (GitHub public): https://github.com/baonguyen3197/aws-rag-chatbot-ai.git
+    repoURL: https://github.com/baonguyen3197/aws-rag-chatbot-ai.git
+    targetRevision: main
+    path: aws_rag_chatbot_ai/deployment
+    directory:
+      recurse: false
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: chatbot
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    retry:
+      limit: 5
+      backoff:
+        duration: 10s
+        factor: 2
+        maxDuration: 5m
+    syncOptions:
+      - CreateNamespace=true
+      - ApplyOutOfSyncOnly=true
+      - RespectIgnoreDifferences=true
+  ignoreDifferences:
+    - group: apps
+      kind: Deployment
+      name: aws-rag-chatbot
+      jsonPointers:
+        - /spec/replicas
+        - /spec/template/spec/containers/0/image
+  revisionHistoryLimit: 5
