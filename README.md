@@ -20,3 +20,10 @@ reflex init
 ```bash
 reflex run
 ```
+
+=====================================
+## Build Reflex App Docker Image
+=====================================
+```bash
+docker build -t nhqb3197/aws_rag_chatbot_ai:latest .
+docker push nhqb3197/aws_rag_chatbot_ai:latest

@@ -161,6 +161,12 @@ resource "aws_eks_addon" "coredns" {
     cluster_name = aws_eks_cluster.this.name
     resolve_conflicts_on_create = "OVERWRITE"
     resolve_conflicts_on_update = "OVERWRITE"
+    
+    depends_on = [
+        aws_eks_node_group.default,
+        aws_eks_addon.vpc_cni,
+        aws_eks_addon.ebs
+    ]
 }
 
 # kube-proxy managed addon
