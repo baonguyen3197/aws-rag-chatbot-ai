@@ -100,4 +100,5 @@ ENV PATH="/opt/venv/bin:$PATH" \
 
 EXPOSE 3000 8000
 
-CMD ["reflex", "export"]
+# CMD ["reflex", "export"]
+CMD ["reflex", "run", "--env", "prod"]

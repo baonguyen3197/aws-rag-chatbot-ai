@@ -10,3 +10,4 @@ fastapi
 sentence-transformers
 faiss-cpu
 numpy
+uvicorn
